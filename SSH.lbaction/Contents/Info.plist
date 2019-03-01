@@ -9,7 +9,11 @@
 	<key>CFBundleName</key>
 	<string>SSH</string>
 	<key>CFBundleVersion</key>
-	<string>1.0</string>
+	<string>1.1</string>
+	<key>LBUpdateURL</key>
+	<string>https://raw.githubusercontent.com/twostairs/lbaction-ssh/master/SSH.lbaction/Contents/Info.plist</string>
+	<key>LBDownloadURL</key>
+	<string></string>
 	<key>LBDescription</key>
 	<dict>
 		<key>LBAuthor</key>
@@ -23,7 +27,7 @@
 		<key>LBTwitter</key>
 		<string>@mrusme</string>
 		<key>LBWebsiteURL</key>
-		<string>https://twostairs.co</string>
+		<string>https://github.com/twostairs/lbaction-ssh</string>
 	</dict>
 	<key>LBRequirements</key>
 	<string></string>

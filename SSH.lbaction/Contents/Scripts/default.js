@@ -1,16 +1,17 @@
 // LaunchBar Action Script
 var SUGGESTIONS = [];
 var UPDATED_AT = Date.now();
+var USER_HOME_URL = 'file:///Users/' + encodeURIComponent(LaunchBar.userName);
 
 function run()
 {
 }
 
-function buildSuggestion(title, subtitle, command) {
+function buildSuggestion(title, subtitle, command, icon) {
     return {
         'title' : title,
         'subtitle': subtitle,
-        'icon' : 'ssh-icon.icns',
+        'icon' : icon,
         'action': 'ssh',
         'actionArgument': command,
         'actionRunsInBackground': false,
@@ -42,17 +43,16 @@ function fuzzysearch (needle, haystack) {
 }
 
 function sshFromShellHistories() {
-    var userHomeUrl = 'file:///Users/' + encodeURIComponent(LaunchBar.userName);
     var histories = [];
 
     try {
-        histories.push(File.readText(File.pathForFileURL(userHomeUrl + '/.bash_history'), 'utf-8'));
+        histories.push(File.readText(File.pathForFileURL(USER_HOME_URL + '/.bash_history'), 'utf-8'));
     } catch(exception) {
         LaunchBar.log('Bash history not available: ' + exception);
     }
 
     try {
-        histories.push(File.readText(File.pathForFileURL(userHomeUrl + '/.zsh_history'), 'ascii'));
+        histories.push(File.readText(File.pathForFileURL(USER_HOME_URL + '/.zsh_history'), 'ascii'));
     } catch(exception) {
         LaunchBar.log('ZSH history not available: ' + exception);
     }
@@ -65,14 +65,35 @@ function sshFromShellHistories() {
 
     while((regexMatch = regex.exec(history)) !== null) {
         var command = regexMatch[1];
-        commands.push(buildSuggestion(command, command, command));
+        commands.push(buildSuggestion(command, command, command, 'ssh-icon.icns'));
     }
 
     return commands.reverse();
 }
 
+function sshFromConfig() {
+    var config = "";
+
+    try {
+        config = File.readText(File.pathForFileURL(USER_HOME_URL + '/.ssh/config'), 'utf-8');
+    } catch(exception) {
+        LaunchBar.log('.ssh/config not available: ' + exception);
+    }
+
+    var regex = RegExp(/Host (.*)\n/gm);
+    var regexMatch = [];
+    var commands = [];
+
+    while((regexMatch = regex.exec(config)) !== null) {
+        var command = regexMatch[1];
+        commands.push(buildSuggestion(command, command, command, 'ssh-icon-fav.icns'));
+    }
+
+    return commands;
+}
+
 function updateIndex() {
-    SUGGESTIONS = SUGGESTIONS.concat(sshFromShellHistories());
+    SUGGESTIONS = [].concat(sshFromConfig(), sshFromShellHistories());
 }
 
 function runWithString(argument)
@@ -85,7 +106,7 @@ function runWithString(argument)
 }
 
 function ssh(argument) {
-    LaunchBar.openURL('ssh://' + argument);
+    LaunchBar.performAction('Run iTerm Command', 'ssh ' + argument);
 }
 
 updateIndex();
